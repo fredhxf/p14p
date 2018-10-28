@@ -569,6 +569,7 @@ heap_getChunk(uint16_t requestedsize, uint8_t **r_pchunk)
     /* Perform GC if out of memory, gc is enabled and not in native session */
     if ((retval == PM_RET_EX_MEM) && (pmHeap.auto_gc == C_TRUE)
         && (gVmGlobal.nativeframe.nf_active == C_FALSE))
+        here  gVmGlobal.nativeframe.nf_active == C_FALSE should be removed,or else may alloc memory failed in native mode
     {
         retval = heap_gcRun();
         PM_RETURN_IF_ERROR(retval);
@@ -1027,6 +1028,8 @@ heap_gcMarkRoots(void)
         retval = heap_gcMarkObj(pmHeap.temp_roots[i]);
         PM_RETURN_IF_ERROR(retval);
     }
+    
+    here missing global vars,some string objects
 
     return retval;
 }
