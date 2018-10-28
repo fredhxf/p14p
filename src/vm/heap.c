@@ -567,9 +567,13 @@ heap_getChunk(uint16_t requestedsize, uint8_t **r_pchunk)
 
 #ifdef HAVE_GC
     /* Perform GC if out of memory, gc is enabled and not in native session */
-    if ((retval == PM_RET_EX_MEM) && (pmHeap.auto_gc == C_TRUE)
-        && (gVmGlobal.nativeframe.nf_active == C_FALSE))
-        here  gVmGlobal.nativeframe.nf_active == C_FALSE should be removed,or else may alloc memory failed in native mode
+
+    //  if ((retval == PM_RET_EX_MEM) && (pmHeap.auto_gc == C_TRUE)
+   //     && (gVmGlobal.nativeframe.nf_active == C_FALSE))
+   
+    //    here  gVmGlobal.nativeframe.nf_active == C_FALSE should be removed,or else may alloc memory failed in native mode
+    
+    if ((retval == PM_RET_EX_MEM) && (pmHeap.auto_gc == C_TRUE))
     {
         retval = heap_gcRun();
         PM_RETURN_IF_ERROR(retval);
@@ -1017,6 +1021,37 @@ heap_gcMarkRoots(void)
     /* Mark the native frame if it is active */
     retval = heap_gcMarkObj((pPmObj_t)&gVmGlobal.nativeframe);
     PM_RETURN_IF_ERROR(retval);
+ /////////////////////////////////////////////////////////////////   
+    //here missing global vars,some string objects
+    
+#ifdef HAVE_CLASSES
+	retval = heap_gcMarkObj(PM_INIT_STR);
+    PM_RETURN_IF_ERROR(retval);
+#endif
+
+#ifdef HAVE_GENERATORS
+	retval = heap_gcMarkObj(PM_GENERATOR_STR);
+    PM_RETURN_IF_ERROR(retval);
+
+	retval = heap_gcMarkObj(PM_NEXT_STR);
+    PM_RETURN_IF_ERROR(retval);
+
+#endif
+
+#ifdef HAVE_ASSERT
+	retval = heap_gcMarkObj(PM_EXCEPTION_STR);
+    PM_RETURN_IF_ERROR(retval);
+#endif
+
+#ifdef HAVE_BYTEARRAY
+	retval = heap_gcMarkObj(PM_BYTEARRAY_STR);
+    PM_RETURN_IF_ERROR(retval);
+#endif
+
+	retval = heap_gcMarkObj(PM_MD_STR);
+    PM_RETURN_IF_ERROR(retval);
+    
+///////////////////////////////////////////////////////////////////    
 
     /* Mark the thread list */
     retval = heap_gcMarkObj((pPmObj_t)gVmGlobal.threadList);
@@ -1029,7 +1064,7 @@ heap_gcMarkRoots(void)
         PM_RETURN_IF_ERROR(retval);
     }
     
-    here missing global vars,some string objects
+    
 
     return retval;
 }
